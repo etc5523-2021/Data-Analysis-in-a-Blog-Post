@@ -1,16 +1,16 @@
 # My Blog
 
 
-This is the blog of [Sahinya Akila].
-The URL of this blog is [https://festive-noether-2e1553.netlify.app/].
+This is the blog of Sahinya Akila.
+The URL of this blog is https://blogsbysahinya.netlify.app/.
 
 ## Blog Post 1
 
 This assessment is due Fri Sep 3 2021 11.55PM AEST.
 
-My selected country is [United Arab Emirates].
+My selected country is United Arab Emirates.
 
-The relevant blog post for this assessment is in [blog1].html
+The relevant blog post for this assessment is in blog1.html
 
 - [x] Selected a country
 - [x] Website with R markdown 
