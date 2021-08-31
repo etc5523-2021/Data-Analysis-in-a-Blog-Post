@@ -1,36 +1,36 @@
 [
   {
-    "path": "posts/2021-08-30-my-first-blog/",
-    "title": "My first blog",
-    "description": "A short description of the post.",
+    "path": "posts/blog1/",
+    "title": "Blog 1",
+    "description": "Welcome to our new blog, ETC5523-Blog. We hope you enjoy \nreading what we have to say!",
     "author": [
       {
-        "name": "Nora Jones",
-        "url": "https://example.com/norajones"
+        "name": "Sahinya Akila",
+        "url": "https://blogsbysahinya.netlify.app/"
       }
     ],
-    "date": "2021-08-30",
+    "date": "2021-08-31",
     "categories": [],
-    "contents": "\nDistill is a publication format for scientific and technical writing, native to the web.\nLearn more about using Distill at https://rstudio.github.io/distill.\n\n\n\n",
+    "contents": "\n\n\n\n\n\n\n",
     "preview": {},
-    "last_modified": "2021-08-30T21:56:19+08:00",
-    "input_file": {}
+    "last_modified": "2021-08-31T13:15:07+08:00",
+    "input_file": "blog1.knit.md"
   },
   {
-    "path": "posts/welcome/",
-    "title": "Welcome to ETC5523_Blog_1",
-    "description": "Welcome to our new blog, ETC5523_Blog_1. We hope you enjoy \nreading what we have to say!",
+    "path": "posts/blog2/",
+    "title": "Welcome to ETC5523-Blog",
+    "description": "Welcome to our new blog, ETC5523-Blog. We hope you enjoy \nreading what we have to say!",
     "author": [
       {
-        "name": "Nora Jones",
-        "url": "https://example.com/norajones"
+        "name": "Sahinya Akila",
+        "url": "https://blogsbysahinya.netlify.app/"
       }
     ],
-    "date": "2021-08-30",
+    "date": "2021-08-31",
     "categories": [],
     "contents": "\n\n\n\n",
     "preview": {},
-    "last_modified": "2021-08-30T21:03:18+08:00",
+    "last_modified": "2021-08-31T13:10:12+08:00",
     "input_file": {}
   }
 ]

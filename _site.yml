@@ -1,12 +1,12 @@
-name: "ETC5523-Blog_Distill"
-title: "ETC5523_Blog_1"
+name: "DistillBlog"
+title: "ETC5523-Blog"
 description: |
-  ETC5523_Blog_1
+  ETC5523-Blog
 output_dir: "_site"
 navbar:
   right:
-    - text: "Home"
-      href: index.html
-    - text: "About"
-      href: about.html
+    - text: "Blog 1"
+      href: posts/blog1/index.html
+    - text: "Blog 2"
+      href: posts/blog2/index.html
 output: distill::distill_article
