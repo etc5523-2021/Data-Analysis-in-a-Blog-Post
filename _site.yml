@@ -1,12 +1,20 @@
-name: "DistillBlog"
-title: "ETC5523-Blog"
+name: "Sahinya's Blogs"
+title: "Sahinya Blogs"
 description: |
-  ETC5523-Blog
+  ETC5523 Blogs
 output_dir: "_site"
 navbar:
+  logo:
+    image: logo.png
+    href: https://blogsbysahinya.netlify.app/
   right:
+    - text: "Home"
+      href: index.html
     - text: "Blog 1"
       href: posts/blog1/index.html
     - text: "Blog 2"
       href: posts/blog2/index.html
+    - icon: fa fa-github
+      href: https://github.com/sahinya17
 output: distill::distill_article
+theme: "theme.css"

@@ -1,15 +1,19 @@
 ---
-title: "Blog 1"
+title: "Covid and its effects on Schools in UAE"
 description: |
-  Welcome to our new blog, ETC5523-Blog. We hope you enjoy 
-  reading what we have to say!
+  The COVID-19 pandemic has made many countries to close schools and other educational institutions. However, are they really contributing to the betterment of the situation? Lets find out...
 author:
   - name: Sahinya Akila 
     url: https://blogsbysahinya.netlify.app/
     affiliation: Monash University
 date: 08-31-2021
+bibliography: biblio.bib
+preview: school-covid.jpeg
 output:
   distill::distill_article:
+    toc: true
+    toc_float: true
+    css: "style.css"
     self_contained: false
 ---
 
@@ -17,17 +21,146 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+![](school-covid.jpeg){width=100%, height=8%}
+
+# Introduction
+
+This pandemic has really affected everybody in different ways that we could not even think of. On such impact is on the school's and the school children. I wanted to explore the effects of this pandemic on the various educational institutions. In one hand, schools are being closed in most of the countries in order to reduce contact between individuals and thereby reducing the spread of the virus. On the other hand, there is a constant need to re-open the schools so that the children have  fruitful learning experience and the economy is also maintained.
+
+In this blog, I have tried to understand the relationship between school closure status and covid cases in United Arab Emirates. The following section reveals the information related to the source data sets. 
+
 ```{r}
 library(tidyverse)
+library(sparkline)
+library(reactable)
+library(htmltools)
+```
+
+```{r}
 # Reading Data
 
 raw_data <- read_csv("../../Data/owid-covid-data.csv")
 
+education_impact <- read_csv("../../Data/covid_impact_education.csv") 
+
+education_impact_uae <- education_impact %>% filter(Country == "United Arab Emirates") %>% mutate(Year = format(as.Date(Date, "%d/%m/%Y"), "%Y"), Month = format(as.Date(Date, "%d/%m/%Y"), "%m"), Status = ifelse(Status == "Closed due to COVID-19", "Closed", Status))
+
 uae_data <- raw_data %>% 
   filter(location == "United Arab Emirates") %>% 
-  select(-c(icu_patients, icu_patients_per_million, hosp_patients, hosp_patients_per_million, weekly_icu_admissions, weekly_icu_admissions_per_million, weekly_hosp_admissions, weekly_hosp_admissions_per_million, total_boosters, total_boosters_per_hundred, extreme_poverty, handwashing_facilities, excess_mortality, iso_code, continent))
+  select(c(date, total_vaccinations, new_deaths, new_cases)) %>% 
+  mutate(total_vaccinations = ifelse(is.na(total_vaccinations), 0, total_vaccinations),
+         new_deaths = ifelse(is.na(new_deaths), 0, new_deaths),
+         new_cases = ifelse(is.na(new_cases), 0, new_cases),
+         Year = format(date, "%Y"), Month = format(date, "%m"))
+
+merged_data <- merge(uae_data, education_impact_uae, by.x = c("Year", "Month"), by.y = c("Year", "Month")) %>% 
+  select(-c(Country, ISO, Note, date, )) 
 ```
 
+# Data Description
+
+In order to understand the Covid situation in United Arab Emirates, I have chosen the dataset from [https://ourworldindata.org/](https://ourworldindata.org/coronavirus/country/united-arab-emirates) which contains information regarding the daily reported confirmed cases, deaths, vaccination status, etc. This data set is available in both .xlsx and .csv formats. After processing the data, there were `r nrow(uae_data)` observations and `r ncol(uae_data)` variables. It is updated everyday and the data that is used in this analysis was downloaded on 2nd September, 2021 [@owidcoronavirus]. 
+
+The status of School closures was obtained from [https://data.humdata.org/](https://data.humdata.org/dataset/global-school-closures-covid19). This data set contains statuses of schools like Fully Open, Closed due to COVID, Academic Break, etc. The data set was downloaded in .csv format and contained `r nrow(education_impact)` observations and `r ncol(education_impact)`. After cleaning it, it contained `r nrow(education_impact_uae)` observations and `r ncol(education_impact_uae)` variables. 
+
+Both the data sets were then merged based on the Date variable and now contains `r nrow(merged_data)` observations and `r ncol(merged_data)` variables. The description of each of the variables are given in the table below. 
+
+```{r desc, layout="l-body-outset"}
+column_name <- colnames(merged_data)
+Description <- c("Year in which the data was recorded", "Month in which the data was recorded", "Total number of vaccinations given to the people (this includes 1st and 2nd dose)", "Count of deaths on that particular day", "Total number of confirmed cases on that particular day", "Date in which the observation was recorded (Format: DD/MM/YYYY)", "This indicates if the school was open or closed during that day")
+
+data_desc <- data.frame(column_name, Description)
+
+desc_react <- reactable(data_desc, 
+          defaultColDef = colDef(headerStyle = list(background = "#043927", color = "white")),
+          rowStyle = JS("function(rowInfo) {
+    return { background: '#fffff9'}
+  }"), columns = list (column_name = colDef(name = "Column Name")), searchable = TRUE, pagination = FALSE, highlight = TRUE, outlined = TRUE)
+
+# desc_title <- htmlwidgets::prependContent(desc_react, 
+#     h3(class = "title", "Column Description"))
+# 
+# desc_title
+
+desc_react
+```
+
+The following section provides a numerical summary statistics of the data.  
+
+# Summary Statistics
+
+The numerical variables that we are concerned about in the analysis are new cases, new deaths and vaccinations. Therefore, to understand the characteristics of these fields, the min, max, mean, standard deviation and variance are obtained and shown in the table below. 
+
+```{r, layout="l-body-outset"}
+options(scipen = 100)
+column_name <- c("Confirmed Cases", "Deaths", "Vaccinations")
+min <- c(min(merged_data$new_cases), min(merged_data$new_deaths), min(merged_data$total_vaccinations))
+
+max <- c(max(merged_data$new_cases), max(merged_data$new_deaths), max(merged_data$total_vaccinations))
+
+mean <- c(round(mean(merged_data$new_cases),1), round(mean(merged_data$new_deaths),1), round(mean(merged_data$total_vaccinations),1))
+
+sd <- c(round(sd(merged_data$new_cases),1), round(sd(merged_data$new_deaths),1), round(sd(merged_data$total_vaccinations),1))
+
+summary_stat <- data.frame(column_name, min, max, mean, sd)
 
 
+reactable(summary_stat, 
+          defaultColDef = colDef(headerStyle = list(background = "#043927", color = "white")),
+          columns = list(column_name = colDef(name = "Column Name")), 
+          rowStyle = JS("function(rowInfo) {
+    return { background: '#fffff9'}
+  }"), pagination = FALSE, highlight = TRUE, outlined = TRUE)
+```
 
+The max number of covid cases in UAE being `r max(merged_data$new_cases)` is comparatively lesser when compared the average number of cases being reported worldwide [@alqutob2020public]. The standard deviation of the confirmed cases and vaccinations are higher indicating that the data in these columns are more spread out when compared to the death. 
+
+
+```{r}
+bar_chart <- function(label, width = "100%", height = "16px", fill = "#00bfc4", background = NULL) {
+  bar <- div(style = list(background = fill, width = width, height = height))
+  chart <- div(style = list(flexGrow = 1, marginLeft = "8px", background = background), bar)
+  div(style = list(display = "flex", alignItems = "center"), label, chart)
+}
+```
+
+# Data Exploration
+
+In order to understand the impact caused by the pandemic on schools, the data is grouped into years (2020 and 2021). This will help in seeing the trend over time. It is further segregated into months. In each month, the school status, number of confirmed cases in that month and the total number of deaths recorded are observed.  
+
+
+```{r, layout="l-body-outset"}
+table_data <- merged_data %>%
+  group_by(Year, Month, Status) %>%
+  summarise(new_cases = list(new_cases), new_deaths = sum(new_deaths))
+
+reactable(table_data, outlined = TRUE, groupBy = "Year", defaultColDef = colDef(headerStyle = list(background = "#043927", color = "white")), defaultExpanded = TRUE, 
+          columns = list(
+  Status = colDef(name = "School Status", cell = function(value) {
+    class <- paste0("tag status-", tolower(substr(value,0,1)))
+    div(class = class, value)
+  }), 
+  new_cases = colDef(name = "Confirmed Cases", defaultSortOrder = NULL, cell = function(value, index) {
+    sparkline(table_data$new_cases[[index]])
+  }),
+  new_deaths = colDef(name = "Total Deaths", align = "left", defaultSortOrder = NULL, cell = function(value) {
+    width <- paste0(value / max(table_data$new_deaths) * 100, "%")
+    bar_chart(value, width = width, fill = "#043927", background = "#e1e1e1")
+  })), rowStyle = JS("function(rowInfo) {
+    if (rowInfo.level > 0) {
+      return { background: '#fffff9', borderLeft: '2px solid #043927' }
+    } else {
+      return { borderLeft: '2px solid transparent' }
+    }
+  }"))
+```
+
+In the initial stages of the pandemic, the schools were open as the number of cases were low and the world was in a confused state. As the understanding of the virus got better, the country closed down the schools for a period of 2 months (May & June, 2020). The country also witnessed a decrease in the number of cases at this point in time. By seeing the decrease in the reported cases, the schools were partially opened. However, it can be observed that the number of deaths started increasing rapidly due to the opening of schools. The causes of deaths are also caused by various other factors that are not in the scope of this analysis. It is also observed that the cases went down in the month of July and August 2021 where the schools went under a academic break. Therefore, it can be observed that there is a strong relationship between the school closure status and the number of deaths. 
+
+# Limitations
+
+Though the covid data set as robust, the school closure data set contained very less information related to the closure status. If the data had contained more information like number of schools closed, number of students studying in each school and if school students were tested covid positive, it would have better to come to a compelling conclusion. 
+
+# Conclusion
+
+According to the analysis done earlier, it can be concluded that there is a positive relationship between the number of deaths and school closure status. The more the schools remain open, the death rate also increases. The pandemic is causing major interruptions to student's schooling experience. The vaccinations are also being provided to kids above 12 years of old and therefore put the kids who do not get vaccinated in risk. The healthcare providers must work in advancing the vaccination policies and provide vaccinations to kids of all age so that their schooling does not get affected due to the virus. Hoping for a better tomorrow :)

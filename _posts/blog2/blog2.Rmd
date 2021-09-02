@@ -1,8 +1,7 @@
 ---
-title: "Welcome to ETC5523-Blog"
+title: "Blog 2"
 description: |
-  Welcome to our new blog, ETC5523-Blog. We hope you enjoy 
-  reading what we have to say!
+  Coming soon :)
 author:
   - name: Sahinya Akila 
     url: https://blogsbysahinya.netlify.app/
@@ -15,10 +14,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-
-# Learn more about creating blogs with Distill at:
-# https://rstudio.github.io/distill/blog.html
-
 ```
 
 
