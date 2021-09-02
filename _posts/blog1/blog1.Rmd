@@ -21,6 +21,8 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+![](school-covid.jpeg){width=100%}
+
 # Introduction
 
 This pandemic has really affected everybody in different ways that we could not even think of. On such impact is on the school's and the school children. I wanted to explore the effects of this pandemic on the various educational institutions. In one hand, schools are being closed in most of the countries in order to reduce contact between individuals and thereby reducing the spread of the virus. On the other hand, there is a constant need to re-open the schools so that the children have  fruitful learning experience and the economy is also maintained.
