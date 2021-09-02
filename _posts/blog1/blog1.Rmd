@@ -21,7 +21,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-![](school-covid.jpeg){width=100%, height=50%}
+![](school-covid.jpeg){width=50%}
 
 # Introduction
 
