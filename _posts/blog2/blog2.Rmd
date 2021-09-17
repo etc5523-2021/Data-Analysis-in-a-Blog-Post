@@ -1,14 +1,19 @@
 ---
-title: "Blog 2"
+title: "AirBnb, Fuel Prices and Covid in Italy"
 description: |
-  Coming soon :)
+  Everyone has started missing holiday trips due to the pandemic. But how is it really affecting the industries that rely on travel? This blog will briefly talk about the Covid situation in Italy and how it has affected the AirBnb business and Fuel Prices. Have a read :)
 author:
   - name: Sahinya Akila 
     url: https://blogsbysahinya.netlify.app/
     affiliation: Monash University
 date: 08-31-2021
+bibliography: biblio.bib
+preview: image.jpeg
 output:
   distill::distill_article:
+    toc: true
+    toc_float: true
+    css: "style.css"
     self_contained: false
 ---
 
@@ -16,5 +21,164 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+![](image.jpeg){width=100%}
 
+```{r}
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(plotly)
+library(reactable)
+library(htmltools)
 
+Italy_listing <- read_csv("../../Data/Italy_listings.csv")
+
+covid_data <- read_csv("../../Data/owid-covid-data.csv") %>% filter(location == "Italy")
+
+Italy_listings <- merge(Italy_listing, covid_data, by.x = "last_review", by.y = "date")
+```
+# Introduction
+
+In the start of 2020, the whole travel industry was having a rapid growth and aggressively expanding into new categories. However, within a couple of months COVID happened and it led to shutting down of the travel industry. Let's see what's the current status of COVID in Italy.
+
+```{r}
+options(scipen = 10000)
+covid <- ggplot(data = covid_data, aes(x = date)) +
+  geom_line(aes(y = total_cases), colour = "red") +
+  geom_line(aes(y = total_deaths), colour = "blue") +
+  geom_line(aes(y = total_vaccinations), colour = "orange") +
+  theme_minimal() +
+  theme(plot.background = element_rect(fill = '#fffff9', colour = '#fffff9'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#043927', linetype = 'dashed'),
+        axis.text.x = element_text(angle = 90, vjust = 0.2, hjust = 0.2)) +
+  xlab("Date") +
+  ylab("Count") 
+
+plotly::ggplotly(covid)%>% 
+  layout(plot_bgcolor='#fffff9')
+```
+
+We can see that, the first case was recorded on the 31st of January, 2020 and the first death was recorded on 21st February, 2020. Currently, Italy is in a emergency state as the country is just coming out of a lock down after the third wave. However, we can observe that the Italian government has really boosted the vaccination procedures for the country. 
+
+# Changes in AirBnb listings during the Covid-19 Pandemic
+
+## Data Description
+
+For analysing the effects of COVID on the AirBnb business in Italy, I have used datasets from [insideairbnb.com](http://insideairbnb.com/get-the-data.html). I have compiled all the listings that were available for different cities in Italy into one single dataset. This dataset contains the Airbnb listings along with the date of posting, price, place, etc. The dataset originally contained posts dating back to the Year 2005 which is not required for this analysis. Therefore, those observations were filtered out. 
+
+The Covid dataset was obtained from [https://ourworldindata.org/](https://ourworldindata.org/coronavirus/country/italy). This dataset had all information related to the total confirmed cases, new cases, vaccinations, tests, deaths, etc. Both the datasets were then merged to obtain the final dataset that is used for the analysis. 
+
+The data description of the variables used for COVID related information are [here](https://blogsbysahinya.netlify.app/posts/blog1/#data-description). The data description for the AirBnB dataset are shown below (it contains only the variables that we are interested in:
+
+```{r}
+column_name <- c("last_review", "price")
+data_description <- c("Date of last review of the listing (latest date of post)", "Price of the listing")
+
+data_desc <- data.frame(column_name, data_description)
+
+desc_react <- reactable(data_desc, 
+          defaultColDef = colDef(headerStyle = list(background = "#043927", color = "white")),
+          rowStyle = JS("function(rowInfo) {
+    return { background: '#fffff9'}
+  }"), columns = list (column_name = colDef(name = "Column Name"), data_description = colDef(name = "Data Description")), searchable = TRUE, pagination = FALSE, highlight = TRUE, outlined = TRUE)
+
+desc_react
+```
+
+## Analysis
+
+In this section, we will be analyzing the trend between the AirBnb listing prices and the COVID cases.  
+
+```{r}
+graph1 <- Italy_listings %>% 
+  mutate(Date = as.Date(last_review), "%Y-%m") %>% 
+  group_by(Date) %>% 
+  summarise(listing_count = n(), covid_cases = mean(total_cases)) %>% 
+  ggplot(aes(x = Date)) +
+  geom_line(aes(y = listing_count)) +
+  geom_line(aes(y = covid_cases/10000), linetype="dotted", colour = "red") +
+  scale_y_continuous(
+    name = "Total Listing",
+    sec.axis = sec_axis(~.*10000, name="Covid Cases")
+  ) +
+  xlab("Date") +
+  theme_minimal() +
+  theme(plot.background = element_rect(fill = '#fffff9', colour = '#fffff9'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#043927', linetype = 'dashed'))
+
+plotly::ggplotly(graph1) %>% 
+  layout(plot_bgcolor='#fffff9')
+```
+
+The plot above compares the total number of confirmed cases to the number of listings posted in a particular month. As it can be noticed, there is a dip in the number of listings around the time of March, 2020. As said earlier, the first cases recorded in Italy was on 31st of January, 2020. This is also supported by an article by @taulli_2020 where they mention that AirBnB faced an existential crisis and there was a 72% drop of gross bookings by April, 2020. In between March and April, there were more cancellations than bookings. 
+
+In the start of 2021, the listings came down in number again due to the rise in the total number of cases and the country was under lockdown during this time. Therefore, it is evident that the AirBnb business was hard hit by the pandemic and are still recovering from the loss. 
+
+# Fuel Price fluctuations during the pandemic
+
+## Data Description
+
+```{r}
+Italy_Fuel_Price <- read_csv("../../Data/weekly_fuel_prices_all_data_from_2005_to_20210823.csv") 
+
+Italy_Fuel_Prices <- merge(Italy_Fuel_Price, covid_data, by.x = "SURVEY_DATE", by.y = "date")
+```
+
+The data for this was obtained from [Kaggle](https://www.kaggle.com/rafabelokurows/weekly-fuel-prices-in-italy). It contains information regarding the date of survey, product (Gas, Oil, etc.), price, etc. The data set originally contained `r nrow(Italy_Fuel_Price)` observations. However, it was filtered out as the data dated back to the year 2005 and that is not required for this analysis. Therefore, it was filtered to contain only information for the year 2020, January to present. The data description of the variables that we will be using for this analysis is as follows:
+
+```{r}
+column_name <- c("SURVEY_DATE", "PRICE")
+data_description <- c("Date of recording the price", "Price of fuel")
+
+data_desc <- data.frame(column_name, data_description)
+
+desc_react <- reactable(data_desc, 
+          defaultColDef = colDef(headerStyle = list(background = "#043927", color = "white")),
+          rowStyle = JS("function(rowInfo) {
+    return { background: '#fffff9'}
+  }"), columns = list (column_name = colDef(name = "Column Name"), data_description = colDef(name = "Data Description")), searchable = TRUE, pagination = FALSE, highlight = TRUE, outlined = TRUE)
+
+desc_react
+```
+
+## Analysis
+
+In this section we will be finding out if the COVID had any effects on Fuel prices and if so, what was the relationship between them. 
+
+```{r}
+Italy_Fuel_Prices <- Italy_Fuel_Prices %>% 
+  mutate(Date = format(as.Date(SURVEY_DATE), "%Y-%m")) %>% 
+  select(c(Date, PRICE, new_cases))
+```
+
+```{r}
+lollipop_plot <- Italy_Fuel_Prices %>%
+  group_by(Date) %>% 
+  summarise(PRICE = mean(PRICE), new_cases = max(new_cases)) %>% 
+  ggplot( aes(x=Date, y=PRICE)) +
+    geom_segment( aes(xend=Date, yend=0)) +
+    geom_point(aes(size=new_cases), color="red") +
+  theme_minimal() +
+  theme(plot.background = element_rect(fill = '#fffff9', colour = '#fffff9'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_line(colour = '#043927', linetype = 'dashed'),
+        axis.text.x = element_text(angle = 90, vjust = 0.2, hjust = 0.2)) +
+    ylab("Fuel Price")
+
+plotly::ggplotly(lollipop_plot) %>% 
+  layout(plot_bgcolor='#fffff9')
+```
+
+As economic activities slowed down sharply across the globe, the demand for fuel dropped. The drop in demand and increase in supply lead to an increase in the fuel prices. This is clearly evident from the graph above. As the number of cases increased, there was a increase in the fuel prices. However, we can also see a drop in the prices during the initial few months. This is due to the trade conflicts between Russia, Saudi Arabia and USA as mentioned by @ispiseo_2021. Italy being a energy dependent country, it ran out of storage space after a point in time, thus the increase in the prices as time went by. 
+
+In conclusion, fuel prices have been fluctuating throughout this period with various reasons to the rise and fall of the prices. 
+
+# Conclusion
+
+So, is COVID a curse or a blessing? We really don't know and the answer differs from person to person. By looking at the fuel prices one would be happy that the prices decreased initially. But the prices kept fluctuating and there is no real association between the fuel prices and COVID cases. However, AirBnb did get a bad hit due to the pandemic and is still recovering from the loss. The listings definitely decreased as the virus started to spread across the country. However, as border restrictions are getting relaxed in Italy, the travel industry will inch towards recovering from their loss. 

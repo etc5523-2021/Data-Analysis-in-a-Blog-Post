@@ -77,11 +77,6 @@ desc_react <- reactable(data_desc,
     return { background: '#fffff9'}
   }"), columns = list (column_name = colDef(name = "Column Name")), searchable = TRUE, pagination = FALSE, highlight = TRUE, outlined = TRUE)
 
-# desc_title <- htmlwidgets::prependContent(desc_react, 
-#     h3(class = "title", "Column Description"))
-# 
-# desc_title
-
 desc_react
 ```
 
